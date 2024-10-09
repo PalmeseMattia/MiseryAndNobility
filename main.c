@@ -3,6 +3,11 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#define RIGHT(n, size) ((n + 1) % size)
+#define LEFT(n) n
+#define UP 1
+#define DOWN 0
+
 typedef struct s_thread_info
 {
 	pthread_mutex_t	*forks_locks;
@@ -28,41 +33,79 @@ void	p_sleep(useconds_t usecs, int id)
 	usleep(usecs);
 }
 
-void	eat(useconds_t usecs, int id)
+void	eat(useconds_t usecs, t_philosopher *philo)
 {
+	int	left;
+	int	right;
+
+	left = (philo -> id - 1) % philo -> info -> n_threads;
+	right = (philo -> id) % philo -> info -> n_threads;
+	printf("ID: %d LEFT: %d RIGHT: %d\n", philo -> id, left, right);
 	//	Try to eat:
-	//	Lock (RIGHT)
-	//	If (RIGHT is DOWN)
-	//		Lock (LEFT)
-	//		If (LEFT is DOWN)
-	//			FORKS UP
-	//			UNLOCK STATUSES
-	//			EAT
-	//			LOCK STATUSES
-	//			FORKS DOWN
-	//			UNLOCK STATUSES
-	//		Else
-	//			Unlock LEFT
-	//			Unlock RIGHT
-	//	Else
-	//		Unlock RIGHT
-	//		Wait a bit
-	//		REPEAT
-	printf("Philosopher %d is putting spaghetti in his pockets.\n", id);
-	usleep(usecs);
+	while(1)
+	{
+		// Lock (RIGHT)
+		pthread_mutex_lock(&philo -> info -> forks_locks[right]);
+		printf("Thread %d Locked RIGHT\n", philo -> id);
+		// If (RIGHT is DOWN)
+		if (philo -> info -> forks_status[right] == DOWN)
+		{
+			// Lock (LEFT)
+			pthread_mutex_lock(&philo -> info -> forks_locks[left]);
+			printf("Thread %d Locked LEFT\n", philo -> id);
+			// If (LEFT is DOWN)
+			if (philo -> info -> forks_status[left] == DOWN)
+			{
+				// FORKS UP
+				philo -> info -> forks_status[left] = UP;
+				philo -> info -> forks_status[right] = UP;
+				// UNLOCK STATUSES
+				pthread_mutex_unlock(&philo -> info -> forks_locks[left]);
+				pthread_mutex_unlock(&philo -> info -> forks_locks[right]);
+				// EAT
+				printf("Philosopher %d is putting spaghetti in his pockets.\n", philo -> id);
+				usleep(usecs);
+				// LOCK STATUSES
+				pthread_mutex_lock(&philo -> info -> forks_locks[left]);
+				pthread_mutex_lock(&philo -> info -> forks_locks[right]);
+				// FORKS DOWN
+				philo -> info -> forks_status[left] = DOWN;
+				philo -> info -> forks_status[right] = DOWN;
+				// UNLOCK STATUSES
+				pthread_mutex_unlock(&philo -> info -> forks_locks[left]);
+				pthread_mutex_unlock(&philo -> info -> forks_locks[right]);
+				// BREAK LOOP
+				break;
+			}
+			// Else
+			else
+			{
+				// Unlock LEFT
+				pthread_mutex_unlock(&philo -> info -> forks_locks[left]);
+				// Unlock RIGHT
+				pthread_mutex_unlock(&philo -> info -> forks_locks[right]);
+			}
+		}
+		// Else
+		else
+		{
+			// Unlock RIGHT
+			pthread_mutex_unlock(&philo -> info -> forks_locks[right]);
+			// Wait a bit
+			usleep(100);
+		}
+	}
+	// REPEAT
 }
 
 void	*hello(void *arg)
 {
 	while (1)
 	{
-		eat(300000, ((t_philosopher *)arg) -> id);
-		// Think()
+		eat(300000, ((t_philosopher *)arg));
 		think(100000, ((t_philosopher *)arg) -> id);
-		// Sleep()
 		p_sleep(100000, ((t_philosopher *)arg) -> id);
 	}
-	printf("Hello from thread %d\n", ((t_philosopher *)arg) -> id);
 	return NULL;
 }
 
@@ -78,6 +121,7 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	}
 	info.n_threads = atoi(argv[1]);
+	printf("Number of threads : %d\n", info.n_threads);
 
 	// Allocate philosophers
 	philosophers = (t_philosopher *)calloc(info.n_threads, sizeof(t_philosopher));
@@ -101,7 +145,7 @@ int main(int argc, char *argv[])
 
 	for (int i = 0; i < info.n_threads; i++)
 	{
-		pthread_mutex_init(info.forks_locks + i, NULL);
+		pthread_mutex_init(&info.forks_locks[i], NULL);
 	}
 	
 	// Now join threads
