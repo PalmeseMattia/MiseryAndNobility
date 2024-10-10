@@ -2,6 +2,7 @@
 #include <pthread.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <sys/time.h>
 
 #define RIGHT(n, size) ((n + 1) % size)
 #define LEFT(n) n
@@ -11,6 +12,7 @@
 typedef struct s_thread_info
 {
 	pthread_mutex_t	*forks_locks;
+	long long		start;
 	char			*forks_status;
 	int				n_threads;
 }	t_thread_info;
@@ -21,15 +23,30 @@ typedef struct s_philosopher
 	int				id;
 }	t_philosopher;
 
-void	think(useconds_t usecs, int id)
+long long	get_milliseconds()
 {
-	printf("Philosopher %d is thinking. Big brain time!\n", id);
+	struct timeval	tv;
+	int				time_res;
+
+	time_res = gettimeofday(&tv, NULL);
+	if (time_res != 0)
+	{
+		printf("Error getting time of the day!\n");
+		exit(EXIT_FAILURE);
+	}
+	else
+		return (((long long)tv.tv_sec)*1000)+(tv.tv_usec/1000);
+}
+
+void	think(useconds_t usecs, t_philosopher *philo)
+{
+	printf("%lld %d is thinking\n", (get_milliseconds() - philo -> info -> start), philo -> id);
 	usleep(usecs);
 }
 
-void	p_sleep(useconds_t usecs, int id)
+void	p_sleep(useconds_t usecs, t_philosopher *philo)
 {
-	printf("Philosopher %d is sleeping. Zzzz!\n", id);
+	printf("%lld %d is sleeping\n", (get_milliseconds() - philo -> info -> start), philo -> id);
 	usleep(usecs);
 }
 
@@ -57,11 +74,13 @@ void	eat(useconds_t usecs, t_philosopher *philo)
 				// FORKS UP
 				philo -> info -> forks_status[left] = UP;
 				philo -> info -> forks_status[right] = UP;
+				printf("%lld %d has taken a fork\n", (get_milliseconds() - philo -> info -> start), philo -> id);
+				printf("%lld %d has taken a fork\n", (get_milliseconds() - philo -> info -> start), philo -> id);
 				// UNLOCK STATUSES
 				pthread_mutex_unlock(&philo -> info -> forks_locks[left]);
 				pthread_mutex_unlock(&philo -> info -> forks_locks[right]);
 				// EAT
-				printf("Philosopher %d is putting spaghetti in his pockets.\n", philo -> id);
+				printf("%lld %d is eating\n", (get_milliseconds() - philo -> info -> start), philo -> id);
 				usleep(usecs);
 				// LOCK STATUSES
 				pthread_mutex_lock(&philo -> info -> forks_locks[left]);
@@ -101,11 +120,12 @@ void	*hello(void *arg)
 	while (1)
 	{
 		eat(300000, ((t_philosopher *)arg));
-		think(100000, ((t_philosopher *)arg) -> id);
-		p_sleep(100000, ((t_philosopher *)arg) -> id);
+		think(100000, ((t_philosopher *)arg));
+		p_sleep(100000, ((t_philosopher *)arg));
 	}
 	return NULL;
 }
+
 
 int main(int argc, char *argv[])
 {
@@ -119,8 +139,10 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	}
 	info.n_threads = atoi(argv[1]);
-	printf("Number of threads : %d\n", info.n_threads);
 
+	// Get Time
+	info.start = get_milliseconds();
+	
 	// Allocate philosophers
 	philosophers = (t_philosopher *)calloc(info.n_threads, sizeof(t_philosopher));
 
@@ -132,7 +154,7 @@ int main(int argc, char *argv[])
 	{
 		pthread_mutex_init(&info.forks_locks[i], NULL);
 	}
-
+	
 	// Create threads
 	threads = (pthread_t *)calloc(info.n_threads, sizeof(pthread_t));
 	for (int i = 0; i < info.n_threads; i++) {
