@@ -40,19 +40,17 @@ void	eat(useconds_t usecs, t_philosopher *philo)
 
 	left = (philo -> id - 1) % philo -> info -> n_threads;
 	right = (philo -> id) % philo -> info -> n_threads;
-	printf("ID: %d LEFT: %d RIGHT: %d\n", philo -> id, left, right);
+	//printf("ID: %d LEFT: %d RIGHT: %d\n", philo -> id, left, right);
 	//	Try to eat:
 	while(1)
 	{
 		// Lock (RIGHT)
 		pthread_mutex_lock(&philo -> info -> forks_locks[right]);
-		printf("Thread %d Locked RIGHT\n", philo -> id);
 		// If (RIGHT is DOWN)
 		if (philo -> info -> forks_status[right] == DOWN)
 		{
 			// Lock (LEFT)
 			pthread_mutex_lock(&philo -> info -> forks_locks[left]);
-			printf("Thread %d Locked LEFT\n", philo -> id);
 			// If (LEFT is DOWN)
 			if (philo -> info -> forks_status[left] == DOWN)
 			{
@@ -126,6 +124,15 @@ int main(int argc, char *argv[])
 	// Allocate philosophers
 	philosophers = (t_philosopher *)calloc(info.n_threads, sizeof(t_philosopher));
 
+	// Create mutexes for the state of a fork
+	info.forks_locks = (pthread_mutex_t *)calloc(info.n_threads, sizeof(pthread_mutex_t));
+	info.forks_status = (char *)calloc(info.n_threads, sizeof(char));
+
+	for (int i = 0; i < info.n_threads; i++)
+	{
+		pthread_mutex_init(&info.forks_locks[i], NULL);
+	}
+
 	// Create threads
 	threads = (pthread_t *)calloc(info.n_threads, sizeof(pthread_t));
 	for (int i = 0; i < info.n_threads; i++) {
@@ -137,15 +144,6 @@ int main(int argc, char *argv[])
 			free(threads);
 			exit(EXIT_FAILURE);
 		}
-	}
-	
-	// Create mutexes for the state of a fork
-	info.forks_locks = (pthread_mutex_t *)calloc(info.n_threads, sizeof(pthread_mutex_t));
-	info.forks_status = (char *)calloc(info.n_threads, sizeof(char));
-
-	for (int i = 0; i < info.n_threads; i++)
-	{
-		pthread_mutex_init(&info.forks_locks[i], NULL);
 	}
 	
 	// Now join threads
