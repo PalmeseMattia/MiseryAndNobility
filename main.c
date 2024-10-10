@@ -21,6 +21,7 @@ typedef struct s_philosopher
 {
 	t_thread_info	*info;
 	int				id;
+	long long		last_meal;
 }	t_philosopher;
 
 long long	get_milliseconds()
@@ -38,10 +39,9 @@ long long	get_milliseconds()
 		return (((long long)tv.tv_sec)*1000)+(tv.tv_usec/1000);
 }
 
-void	think(useconds_t usecs, t_philosopher *philo)
+void	think(t_philosopher *philo)
 {
 	printf("%lld %d is thinking\n", (get_milliseconds() - philo -> info -> start), philo -> id);
-	usleep(usecs);
 }
 
 void	p_sleep(useconds_t usecs, t_philosopher *philo)
@@ -81,6 +81,7 @@ void	eat(useconds_t usecs, t_philosopher *philo)
 				pthread_mutex_unlock(&philo -> info -> forks_locks[right]);
 				// EAT
 				printf("%lld %d is eating\n", (get_milliseconds() - philo -> info -> start), philo -> id);
+				philo -> last_meal = get_milliseconds();
 				usleep(usecs);
 				// LOCK STATUSES
 				pthread_mutex_lock(&philo -> info -> forks_locks[left]);
@@ -120,8 +121,8 @@ void	*hello(void *arg)
 	while (1)
 	{
 		eat(300000, ((t_philosopher *)arg));
-		think(100000, ((t_philosopher *)arg));
 		p_sleep(100000, ((t_philosopher *)arg));
+		think((t_philosopher *)arg);
 	}
 	return NULL;
 }
@@ -160,6 +161,7 @@ int main(int argc, char *argv[])
 	for (int i = 0; i < info.n_threads; i++) {
 		philosophers[i].info = &info;
 		philosophers[i].id = i + 1;
+		philosophers[i].last_meal = get_milliseconds();
 		res = pthread_create(threads + i, NULL, &hello, philosophers + i);
 		if (res != 0) {
 			perror("Pthread create failed!");
