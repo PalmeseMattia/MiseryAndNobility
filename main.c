@@ -1,3 +1,14 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: dpalmese <dpalmese@student.42roma.it>      +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/10/11 12:49:47 by dpalmese          #+#    #+#             */
+/*   Updated: 2024/10/11 14:21:03 by dpalmese         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 #include <stdio.h>
 #include <pthread.h>
 #include <stdlib.h>
@@ -13,6 +24,7 @@ typedef struct s_thread_info
 {
 	long long		start;
 	pthread_mutex_t	*forks_locks;
+	pthread_mutex_t	write_lock;
 	int				n_threads;
 	unsigned int	time_to_die;
 	unsigned int	time_to_eat;
@@ -43,16 +55,44 @@ long long	get_milliseconds()
 		return (((long long)tv.tv_sec)*1000)+(tv.tv_usec/1000);
 }
 
+void	print_eat(t_philosopher *philo)
+{
+	pthread_mutex_lock(&philo -> info -> write_lock);
+	printf("%lld %d is eating\n", (get_milliseconds() - philo -> info -> start), philo -> id);
+	pthread_mutex_unlock(&philo -> info -> write_lock);
+}
+
+void	print_think(t_philosopher *philo)
+{
+	pthread_mutex_lock(&philo -> info -> write_lock);
+	printf("%lld %d is thinking\n", (get_milliseconds() - philo -> info -> start), philo -> id);
+	pthread_mutex_unlock(&philo -> info -> write_lock);
+}
+
+void	print_sleep(t_philosopher *philo)
+{
+	pthread_mutex_lock(&philo -> info -> write_lock);
+	printf("%lld %d is sleeping\n", (get_milliseconds() - philo -> info -> start), philo -> id);
+	pthread_mutex_unlock(&philo -> info -> write_lock);
+}
+
+void	print_fork(t_philosopher *philo)
+{
+	pthread_mutex_lock(&philo -> info -> write_lock);
+	printf("%lld %d has taken a fork\n", (get_milliseconds() - philo -> info -> start), philo -> id);
+	pthread_mutex_unlock(&philo -> info -> write_lock);
+}
+
 void	think(t_philosopher *philo)
 {
-	printf("%lld %d is thinking\n", (get_milliseconds() - philo -> info -> start), philo -> id);
+	print_think(philo);
 	if (philo -> id % 2 == 1 && philo -> info -> n_threads % 2 == 1)
 		usleep(philo -> info -> time_to_eat * 1000);
 }
 
 void	p_sleep(t_philosopher *philo)
 {
-	printf("%lld %d is sleeping\n", (get_milliseconds() - philo -> info -> start), philo -> id);
+	print_sleep(philo);
 	usleep(philo -> info -> time_to_sleep * 1000);
 }
 
@@ -74,12 +114,12 @@ void	eat(t_philosopher *philo)
 			// FORKS UP
 			philo -> info -> forks_status[left] = UP;
 			philo -> info -> forks_status[right] = UP;
-			printf("%lld %d has taken a fork\n", (get_milliseconds() - philo -> info -> start), philo -> id);
+			print_fork(philo);
 			// UNLOCK STATUSES
 			pthread_mutex_unlock(&philo -> info -> forks_locks[left]);
 			pthread_mutex_unlock(&philo -> info -> forks_locks[right]);
 			// EAT
-			printf("%lld %d is eating\n", (get_milliseconds() - philo -> info -> start), philo -> id);
+			print_eat(philo);
 			philo -> last_meal = get_milliseconds();
 			usleep(philo -> info -> time_to_eat * 1000);
 			// LOCK STATUSES
@@ -127,6 +167,7 @@ void	*stop_simulation(void *arg)
 	{
 		if (get_milliseconds() - philos[id].last_meal > philos[id].info -> time_to_die)
 		{
+			pthread_mutex_lock(&philos[0].info -> write_lock);
 			printf("%lld %d died\n", get_milliseconds() - philos[id].info -> start, id + 1);
 			break;
 		}
@@ -164,11 +205,13 @@ int main(int argc, char *argv[])
 	// Create mutexes for the state of a fork
 	info.forks_locks = (pthread_mutex_t *)calloc(info.n_threads, sizeof(pthread_mutex_t));
 	info.forks_status = (char *)calloc(info.n_threads, sizeof(char));
-
 	for (int i = 0; i < info.n_threads; i++)
 	{
 		pthread_mutex_init(&info.forks_locks[i], NULL);
 	}
+	
+	// Create mutex to write
+	pthread_mutex_init(&info.write_lock, NULL);
 	
 	// Create threads
 	threads = (pthread_t *)calloc(info.n_threads, sizeof(pthread_t));
