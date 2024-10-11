@@ -66,16 +66,8 @@ void	eat(t_philosopher *philo)
 	//	Try to eat:
 	while(1)
 	{
-		if (philo -> id % 2 == 0)
-		{
-			pthread_mutex_lock(&philo -> info -> forks_locks[right]);
-			pthread_mutex_lock(&philo -> info -> forks_locks[left]);
-		}
-		else
-		{
-			pthread_mutex_lock(&philo -> info -> forks_locks[left]);
-			pthread_mutex_lock(&philo -> info -> forks_locks[right]);
-		}
+		pthread_mutex_lock(&philo -> info -> forks_locks[right]);
+		pthread_mutex_lock(&philo -> info -> forks_locks[left]);
 		// If (FORKS ARE DOWN)
 		if (philo -> info -> forks_status[right] == DOWN && philo -> info -> forks_status[left] == DOWN)
 		{
