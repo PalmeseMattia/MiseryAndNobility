@@ -1,6 +1,6 @@
-SRC = main.c
+SRC = src/main.c src/print.c src/utils.c
 
 FLAGS = -Wall -Wextra -Werror -g
 
 all :
-	gcc main.c -lpthread $(FLAGS) -o philo
+	gcc $(SRC) -lpthread $(FLAGS) -o philo

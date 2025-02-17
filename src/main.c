@@ -6,82 +6,10 @@
 /*   By: dpalmese <dpalmese@student.42roma.it>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/10/11 12:49:47 by dpalmese          #+#    #+#             */
-/*   Updated: 2024/10/11 14:21:03 by dpalmese         ###   ########.fr       */
+/*   Updated: 2024/10/11 14:43:20 by dpalmese         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-#include <stdio.h>
-#include <pthread.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <sys/time.h>
-
-#define RIGHT(n, size) ((n + 1) % size)
-#define LEFT(n) n
-#define UP 1
-#define DOWN 0
-
-typedef struct s_thread_info
-{
-	long long		start;
-	pthread_mutex_t	*forks_locks;
-	pthread_mutex_t	write_lock;
-	int				n_threads;
-	unsigned int	time_to_die;
-	unsigned int	time_to_eat;
-	unsigned int	time_to_sleep;
-	char			*forks_status;
-	char			someone_died;
-}	t_thread_info;
-
-typedef struct s_philosopher
-{
-	t_thread_info	*info;
-	long long		last_meal;
-	int				id;
-}	t_philosopher;
-
-long long	get_milliseconds()
-{
-	struct timeval	tv;
-	int				time_res;
-
-	time_res = gettimeofday(&tv, NULL);
-	if (time_res != 0)
-	{
-		printf("Error getting time of the day!\n");
-		exit(EXIT_FAILURE);
-	}
-	else
-		return (((long long)tv.tv_sec)*1000)+(tv.tv_usec/1000);
-}
-
-void	print_eat(t_philosopher *philo)
-{
-	pthread_mutex_lock(&philo -> info -> write_lock);
-	printf("%lld %d is eating\n", (get_milliseconds() - philo -> info -> start), philo -> id);
-	pthread_mutex_unlock(&philo -> info -> write_lock);
-}
-
-void	print_think(t_philosopher *philo)
-{
-	pthread_mutex_lock(&philo -> info -> write_lock);
-	printf("%lld %d is thinking\n", (get_milliseconds() - philo -> info -> start), philo -> id);
-	pthread_mutex_unlock(&philo -> info -> write_lock);
-}
-
-void	print_sleep(t_philosopher *philo)
-{
-	pthread_mutex_lock(&philo -> info -> write_lock);
-	printf("%lld %d is sleeping\n", (get_milliseconds() - philo -> info -> start), philo -> id);
-	pthread_mutex_unlock(&philo -> info -> write_lock);
-}
-
-void	print_fork(t_philosopher *philo)
-{
-	pthread_mutex_lock(&philo -> info -> write_lock);
-	printf("%lld %d has taken a fork\n", (get_milliseconds() - philo -> info -> start), philo -> id);
-	pthread_mutex_unlock(&philo -> info -> write_lock);
-}
+#include "../include/philosophers.h"
 
 void	think(t_philosopher *philo)
 {
@@ -145,7 +73,7 @@ void	eat(t_philosopher *philo)
 	// REPEAT
 }
 
-void	*hello(void *arg)
+void	*main_loop(void *arg)
 {
 	while (1)
 	{
@@ -220,7 +148,7 @@ int main(int argc, char *argv[])
 		philosophers[i].id = i + 1;
 		philosophers[i].last_meal = get_milliseconds();
 		// TODO: create with detach attribute
-		res = pthread_create(threads + i, NULL, &hello, philosophers + i);
+		res = pthread_create(threads + i, NULL, &main_loop, philosophers + i);
 		if (res != 0) {
 			perror("Pthread create failed!");
 			free(threads);
