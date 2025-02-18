@@ -50,34 +50,39 @@ static void	initialize_info(t_thread_info *info, int argc, char *argv[])
 	pthread_mutex_init(&info->write_lock, NULL);
 }
 
-static void	init_philos(t_philosopher *philos, pthread_t *threads, t_thread_info *info)
+void	init_philos(t_philosopher *philos, pthread_t *threads, t_thread_info *info)
 {
 	pthread_attr_t	attr;
 	int				res;
+	int				i;
 
+	i = 0;
 	pthread_attr_init(&attr);
 	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-	for (int i = 0; i < info->n_threads; i++) {
+	while (i < info->n_threads)
+	{
 		philos[i].info = info;
 		philos[i].id = i + 1;
 		philos[i].last_meal = get_milliseconds();
 		res = pthread_create(threads + i, &attr, &main_loop, philos + i);
-		if (res != 0) {
+		if (res != 0)
+		{
 			perror("Pthread create failed!");
 			free(threads);
 			exit(EXIT_FAILURE);
 		}
+		i++;
 	}
 }
 
-int main(int argc, char *argv[])
+int	main(int argc, char *argv[])
 {
 	t_thread_info	info;
 	t_philosopher	*philosophers;
 	pthread_t		*threads;
 	pthread_t		monitor;
 
-	initialize_info(&info, argc, argv);	
+	initialize_info(&info, argc, argv);
 	philosophers = ft_calloc(info.n_threads, sizeof(t_philosopher));
 	threads = ft_calloc(info.n_threads, sizeof(pthread_t));
 	init_philos(philosophers, threads, &info);
