@@ -34,6 +34,7 @@ void	*stop_simulation(void *arg)
 	int				id;
 	long long		time;
 	long long		death;
+	int				odd;
 
 	id = 0;
 	philos = (t_philosopher *)arg;
@@ -47,7 +48,8 @@ void	*stop_simulation(void *arg)
 			printf("%lld %d died\n", death, id + 1);
 			break ;
 		}
-		if (philos[id].info->max_meals > 0 && id % 2 == 0 && check_meals(philos[id]))
+		odd = id % 2 == 0;
+		if (philos[id].info->max_meals > 0 && odd && check_meals(philos[id]))
 			break ;
 		id = (id + 1) % philos[id].info -> n_threads;
 	}
