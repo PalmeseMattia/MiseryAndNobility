@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   actions.c                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: dpalmese <dpalmese@student.42roma.it>      +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/02/18 16:03:25 by dpalmese          #+#    #+#             */
+/*   Updated: 2025/02/18 16:03:52 by dpalmese         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "../include/philosophers.h"
 
 void	think(t_philosopher *philo)
@@ -13,9 +25,18 @@ void	p_sleep(t_philosopher *philo)
 	usleep(philo -> info -> time_to_sleep * 1000);
 }
 
+static void	p_eat(t_philosopher *philo)
+{
+	print_eat(philo);
+	philo -> last_meal = get_milliseconds();
+	usleep(philo -> info -> time_to_eat * 1000);
+	philo->info->n_meals[philo->id]++;
+}
+
+// 
 void	eat(t_philosopher *philo)
 {
-	while(1)
+	while (1)
 	{
 		lock_forks(philo);
 		if (check_forks(philo, DOWN))
@@ -23,13 +44,11 @@ void	eat(t_philosopher *philo)
 			set_forks(philo, UP);
 			print_fork(philo);
 			unlock_forks(philo);
-			print_eat(philo);
-			philo -> last_meal = get_milliseconds();
-			usleep(philo -> info -> time_to_eat * 1000);
+			p_eat(philo);
 			lock_forks(philo);
 			set_forks(philo, DOWN);
 			unlock_forks(philo);
-			break;
+			break ;
 		}
 		else
 		{

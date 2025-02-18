@@ -22,6 +22,8 @@
 #define LEFT(n) n
 #define UP 1
 #define DOWN 0
+#define TRUE 1
+#define FALSE 0
 
 typedef struct s_thread_info
 {
@@ -34,6 +36,8 @@ typedef struct s_thread_info
 	unsigned int	time_to_sleep;
 	char			*forks_status;
 	char			someone_died;
+	int				*n_meals;
+	int				max_meals;
 }	t_thread_info;
 
 typedef struct s_philosopher
@@ -41,7 +45,6 @@ typedef struct s_philosopher
 	t_thread_info	*info;
 	long long		last_meal;
 	int				id;
-	int				n_meals;
 }	t_philosopher;
 
 // Prints

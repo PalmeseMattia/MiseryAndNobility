@@ -40,12 +40,18 @@ int main(int argc, char *argv[])
 	info.time_to_eat = atoi(argv[3]);
 	info.time_to_sleep = atoi(argv[4]);
 	info.someone_died = 0;
+	if (argc > 5)
+		info.max_meals = atoi(argv[5]);
+	else
+		info.max_meals = 0;
 
 	// Get Time
 	info.start = get_milliseconds();
 	
 	// Allocate philosophers
 	philosophers = (t_philosopher *)calloc(info.n_threads, sizeof(t_philosopher));
+	// Allocate array of meals
+	info.n_meals = (int *)calloc(info.n_threads, sizeof(int));
 
 	// Create mutexes for the state of a fork
 	info.forks_locks = (pthread_mutex_t *)calloc(info.n_threads, sizeof(pthread_mutex_t));
