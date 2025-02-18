@@ -12,26 +12,42 @@
 
 #include "../include/philosophers.h"
 
-void	lock_forks(t_philosopher *philo)
+void lock_forks(t_philosopher *philo)
 {
 	int	left;
 	int	right;
 
-	left = (philo -> id - 1) % philo -> info -> n_threads;
-	right = (philo -> id) % philo -> info -> n_threads;
-	pthread_mutex_lock(&philo -> info -> forks_locks[right]);
-	pthread_mutex_lock(&philo -> info -> forks_locks[left]);
+    left = (philo->id - 1) % philo->info->n_threads;
+    right = (philo->id) % philo->info->n_threads;
+    if (left < right)
+	{
+        pthread_mutex_lock(&philo->info->forks_locks[left]);
+        pthread_mutex_lock(&philo->info->forks_locks[right]);
+    }
+	else 
+	{
+        pthread_mutex_lock(&philo->info->forks_locks[right]);
+        pthread_mutex_lock(&philo->info->forks_locks[left]);
+    }
 }
 
-void	unlock_forks(t_philosopher *philo)
+void unlock_forks(t_philosopher *philo)
 {
 	int	left;
 	int	right;
 
-	left = (philo -> id - 1) % philo -> info -> n_threads;
-	right = (philo -> id) % philo -> info -> n_threads;
-	pthread_mutex_unlock(&philo -> info -> forks_locks[right]);
-	pthread_mutex_unlock(&philo -> info -> forks_locks[left]);
+    left = (philo->id - 1) % philo->info->n_threads;
+    right = (philo->id) % philo->info->n_threads;
+    if (left < right)
+	{
+        pthread_mutex_unlock(&philo->info->forks_locks[right]);
+        pthread_mutex_unlock(&philo->info->forks_locks[left]);
+    }
+	else
+	{
+        pthread_mutex_unlock(&philo->info->forks_locks[left]);
+        pthread_mutex_unlock(&philo->info->forks_locks[right]);
+    }
 }
 
 void	set_forks(t_philosopher *philo, int status)

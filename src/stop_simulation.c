@@ -47,7 +47,7 @@ void	*stop_simulation(void *arg)
 			printf("%lld %d died\n", death, id + 1);
 			break ;
 		}
-		if (philos[id].info->max_meals > 0 && check_meals(philos[id]))
+		if (philos[id].info->max_meals > 0 && id % 2 == 0 && check_meals(philos[id]))
 			break ;
 		id = (id + 1) % philos[id].info -> n_threads;
 	}
