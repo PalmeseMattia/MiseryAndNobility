@@ -22,11 +22,24 @@ void	*main_loop(void *arg)
 	return (NULL);
 }
 
-static void	initialize_info(t_thread_info *info, int argc, char *argv[])
+static void	init_mutexes(t_thread_info *info)
 {
 	int	i;
 
 	i = 0;
+	info->forks_locks = ft_calloc(info->n_threads, sizeof(pthread_mutex_t));
+	info->meals_locks = ft_calloc(info->n_threads, sizeof(pthread_mutex_t));
+	while (i < info->n_threads)
+	{
+		pthread_mutex_init(&info->forks_locks[i], NULL);
+		pthread_mutex_init(&info->meals_locks[i], NULL);
+		i++;
+	}
+	pthread_mutex_init(&info->write_lock, NULL);
+}
+
+static void	initialize_info(t_thread_info *info, int argc, char *argv[])
+{
 	if (argc < 5)
 		exit(EXIT_FAILURE);
 	info->n_threads = atoi(argv[1]);
@@ -40,16 +53,8 @@ static void	initialize_info(t_thread_info *info, int argc, char *argv[])
 		info->max_meals = 0;
 	info->start = get_milliseconds();
 	info->n_meals = ft_calloc(info->n_threads, sizeof(int));
-	info->forks_locks = ft_calloc(info->n_threads, sizeof(pthread_mutex_t));
-	info->meals_locks = ft_calloc(info->n_threads, sizeof(pthread_mutex_t));
 	info->forks_status = ft_calloc(info->n_threads, sizeof(char));
-	while (i < info->n_threads)
-	{
-		pthread_mutex_init(&info->forks_locks[i], NULL);
-		pthread_mutex_init(&info->meals_locks[i], NULL);
-		i++;
-	}
-	pthread_mutex_init(&info->write_lock, NULL);
+	init_mutexes(info);
 }
 
 void	init_philos(t_philos *philos, pthread_t *threads, t_thread_info *info)
