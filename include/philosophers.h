@@ -47,6 +47,7 @@ typedef struct s_philosopher
 	int				id;
 }	t_philosopher;
 
+void		*ft_calloc(size_t nmemb, size_t size);
 // Prints
 void		print_eat(t_philosopher *philo);
 void		print_sleep(t_philosopher *philo);

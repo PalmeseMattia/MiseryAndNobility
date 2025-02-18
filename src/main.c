@@ -22,6 +22,32 @@ void	*main_loop(void *arg)
 	return (NULL);
 }
 
+static void	initialize_info(t_thread_info *info, int argc, char *argv[])
+{
+	if (argc < 5) {
+		printf("Please specify all arguments!\n");
+		exit(EXIT_FAILURE);
+	}
+	info->n_threads = atoi(argv[1]);
+	info->time_to_die = atoi(argv[2]);
+	info->time_to_eat = atoi(argv[3]);
+	info->time_to_sleep = atoi(argv[4]);
+	info->someone_died = 0;
+	if (argc > 5)
+		info->max_meals = atoi(argv[5]);
+	else
+		info->max_meals = 0;
+	info->start = get_milliseconds();
+	info->n_meals = ft_calloc(info->n_threads, sizeof(int));
+	info->forks_locks = ft_calloc(info->n_threads, sizeof(pthread_mutex_t));
+	info->forks_status = ft_calloc(info->n_threads, sizeof(char));
+	for (int i = 0; i < info->n_threads; i++)
+	{
+		pthread_mutex_init(&info->forks_locks[i], NULL);
+	}
+	pthread_mutex_init(&info->write_lock, NULL);
+}
+
 int main(int argc, char *argv[])
 {
 	t_thread_info	info;
@@ -29,58 +55,25 @@ int main(int argc, char *argv[])
 	pthread_t		*threads;
 	pthread_t		monitor;
 	int				res;
+	pthread_attr_t	attr;
 
-	if (argc < 5) {
-		printf("Please specify all arguments! Usage:\n");
-		printf("./philo <number_of_philosophers> <time_to_die> <time_to_eat> <time_to_sleep>\n");
-		exit(EXIT_FAILURE);
-	}
-	info.n_threads = atoi(argv[1]);
-	info.time_to_die = atoi(argv[2]);
-	info.time_to_eat = atoi(argv[3]);
-	info.time_to_sleep = atoi(argv[4]);
-	info.someone_died = 0;
-	if (argc > 5)
-		info.max_meals = atoi(argv[5]);
-	else
-		info.max_meals = 0;
-
-	// Get Time
-	info.start = get_milliseconds();
-	
-	// Allocate philosophers
-	philosophers = (t_philosopher *)calloc(info.n_threads, sizeof(t_philosopher));
-	// Allocate array of meals
-	info.n_meals = (int *)calloc(info.n_threads, sizeof(int));
-
-	// Create mutexes for the state of a fork
-	info.forks_locks = (pthread_mutex_t *)calloc(info.n_threads, sizeof(pthread_mutex_t));
-	info.forks_status = (char *)calloc(info.n_threads, sizeof(char));
-	for (int i = 0; i < info.n_threads; i++)
-	{
-		pthread_mutex_init(&info.forks_locks[i], NULL);
-	}
-	
-	// Create mutex to write
-	pthread_mutex_init(&info.write_lock, NULL);
-	
-	// Create threads
-	threads = (pthread_t *)calloc(info.n_threads, sizeof(pthread_t));
+	initialize_info(&info, argc, argv);	
+	philosophers = ft_calloc(info.n_threads, sizeof(t_philosopher));
+	threads = ft_calloc(info.n_threads, sizeof(pthread_t));
+	pthread_attr_init(&attr);
+	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
 	for (int i = 0; i < info.n_threads; i++) {
 		philosophers[i].info = &info;
 		philosophers[i].id = i + 1;
 		philosophers[i].last_meal = get_milliseconds();
-		// TODO: create with detach attribute
-		res = pthread_create(threads + i, NULL, &main_loop, philosophers + i);
+		res = pthread_create(threads + i, &attr, &main_loop, philosophers + i);
 		if (res != 0) {
 			perror("Pthread create failed!");
 			free(threads);
 			exit(EXIT_FAILURE);
 		}
 	}
-	
 	pthread_create(&monitor, NULL, &stop_simulation, philosophers);
-	// Now join threads
 	pthread_join(monitor, NULL);
 	free(threads);
 	free(info.forks_locks);
