@@ -19,8 +19,13 @@ int	check_meals(t_philos philo)
 	id = 0;
 	while (id < philo.info->n_threads)
 	{
+		pthread_mutex_lock(&philo.info->meals_locks[id]);
 		if (philo.info->n_meals[id] < philo.info->max_meals)
+		{
+			pthread_mutex_unlock(&philo.info->meals_locks[id]);
 			return (FALSE);
+		}
+		pthread_mutex_unlock(&philo.info->meals_locks[id]);
 		id++;
 	}
 	pthread_mutex_lock(&philo.info->write_lock);

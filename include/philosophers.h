@@ -27,6 +27,7 @@ typedef struct s_thread_info
 {
 	long long		start;
 	pthread_mutex_t	*forks_locks;
+	pthread_mutex_t	*meals_locks;
 	pthread_mutex_t	write_lock;
 	int				n_threads;
 	unsigned int	time_to_die;

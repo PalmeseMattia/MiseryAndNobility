@@ -30,10 +30,11 @@ static void	p_eat(t_philos *philo)
 	print_eat(philo);
 	philo -> last_meal = get_milliseconds();
 	usleep(philo -> info -> time_to_eat * 1000);
+	pthread_mutex_lock(&philo->info->meals_locks[philo->id -1]);
 	philo->info->n_meals[philo->id - 1]++;
+	pthread_mutex_unlock(&philo->info->meals_locks[philo->id -1]);
 }
 
-// 
 void	eat(t_philos *philo)
 {
 	while (1)
