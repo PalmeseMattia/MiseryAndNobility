@@ -30,7 +30,7 @@ static void	p_eat(t_philosopher *philo)
 	print_eat(philo);
 	philo -> last_meal = get_milliseconds();
 	usleep(philo -> info -> time_to_eat * 1000);
-	philo->info->n_meals[philo->id]++;
+	philo->info->n_meals[philo->id - 1]++;
 }
 
 // 
