@@ -12,20 +12,20 @@
 
 #include "../include/philosophers.h"
 
-void	think(t_philosopher *philo)
+void	think(t_philos *philo)
 {
 	print_think(philo);
 	if (philo -> id % 2 == 1 && philo -> info -> n_threads % 2 == 1)
 		usleep(philo -> info -> time_to_eat * 1000);
 }
 
-void	p_sleep(t_philosopher *philo)
+void	p_sleep(t_philos *philo)
 {
 	print_sleep(philo);
 	usleep(philo -> info -> time_to_sleep * 1000);
 }
 
-static void	p_eat(t_philosopher *philo)
+static void	p_eat(t_philos *philo)
 {
 	print_eat(philo);
 	philo -> last_meal = get_milliseconds();
@@ -34,7 +34,7 @@ static void	p_eat(t_philosopher *philo)
 }
 
 // 
-void	eat(t_philosopher *philo)
+void	eat(t_philos *philo)
 {
 	while (1)
 	{

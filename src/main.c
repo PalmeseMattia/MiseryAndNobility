@@ -15,9 +15,9 @@ void	*main_loop(void *arg)
 {
 	while (1)
 	{
-		eat((t_philosopher *)arg);
-		p_sleep((t_philosopher *)arg);
-		think((t_philosopher *)arg);
+		eat((t_philos *)arg);
+		p_sleep((t_philos *)arg);
+		think((t_philos *)arg);
 	}
 	return (NULL);
 }
@@ -50,7 +50,7 @@ static void	initialize_info(t_thread_info *info, int argc, char *argv[])
 	pthread_mutex_init(&info->write_lock, NULL);
 }
 
-void	init_philos(t_philosopher *philos, pthread_t *threads, t_thread_info *info)
+void	init_philos(t_philos *philos, pthread_t *threads, t_thread_info *info)
 {
 	pthread_attr_t	attr;
 	int				res;
@@ -78,12 +78,12 @@ void	init_philos(t_philosopher *philos, pthread_t *threads, t_thread_info *info)
 int	main(int argc, char *argv[])
 {
 	t_thread_info	info;
-	t_philosopher	*philosophers;
+	t_philos		*philosophers;
 	pthread_t		*threads;
 	pthread_t		monitor;
 
 	initialize_info(&info, argc, argv);
-	philosophers = ft_calloc(info.n_threads, sizeof(t_philosopher));
+	philosophers = ft_calloc(info.n_threads, sizeof(t_philos));
 	threads = ft_calloc(info.n_threads, sizeof(pthread_t));
 	init_philos(philosophers, threads, &info);
 	pthread_create(&monitor, NULL, &stop_simulation, philosophers);

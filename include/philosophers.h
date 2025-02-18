@@ -9,21 +9,19 @@
 /*   Updated: 2024/10/11 14:41:40 by dpalmese         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
-#ifndef PHILO_H
-# define PHILO_H
+#ifndef PHILOSOPHERS_H
+# define PHILOSOPHERS_H
 
-#include <stdio.h>
-#include <pthread.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <sys/time.h>
+# include <stdio.h>
+# include <pthread.h>
+# include <stdlib.h>
+# include <unistd.h>
+# include <sys/time.h>
 
-#define RIGHT(n, size) ((n + 1) % size)
-#define LEFT(n) n
-#define UP 1
-#define DOWN 0
-#define TRUE 1
-#define FALSE 0
+# define UP 1
+# define DOWN 0
+# define TRUE 1
+# define FALSE 0
 
 typedef struct s_thread_info
 {
@@ -45,26 +43,26 @@ typedef struct s_philosopher
 	t_thread_info	*info;
 	long long		last_meal;
 	int				id;
-}	t_philosopher;
+}	t_philos;
 
 void		*ft_calloc(size_t nmemb, size_t size);
 // Prints
-void		print_eat(t_philosopher *philo);
-void		print_sleep(t_philosopher *philo);
-void		print_think(t_philosopher *philo);
-void		print_fork(t_philosopher *philo);
+void		print_eat(t_philos *philo);
+void		print_sleep(t_philos *philo);
+void		print_think(t_philos *philo);
+void		print_fork(t_philos *philo);
 // Time util
-long long	get_milliseconds();
+long long	get_milliseconds(void);
 // Monitor routine
 void		*stop_simulation(void *arg);
 // Mutex utils
-void		lock_forks(t_philosopher *philo);
-void		unlock_forks(t_philosopher *philo);
-void		set_forks(t_philosopher *philo, int status);
-int			check_forks(t_philosopher *philo, int status);
+void		lock_forks(t_philos *philo);
+void		unlock_forks(t_philos *philo);
+void		set_forks(t_philos *philo, int status);
+int			check_forks(t_philos *philo, int status);
 // Actions
-void		think(t_philosopher *philo);
-void		p_sleep(t_philosopher *philo);
-void		eat(t_philosopher *philo);
+void		think(t_philos *philo);
+void		p_sleep(t_philos *philo);
+void		eat(t_philos *philo);
 
 #endif

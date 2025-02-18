@@ -12,7 +12,7 @@
 
 #include "../include/philosophers.h"
 
-int	check_meals(t_philosopher philo)
+int	check_meals(t_philos philo)
 {
 	int	id;
 
@@ -30,14 +30,14 @@ int	check_meals(t_philosopher philo)
 
 void	*stop_simulation(void *arg)
 {
-	t_philosopher	*philos;
+	t_philos		*philos;
 	int				id;
 	long long		time;
 	long long		death;
 	int				odd;
 
 	id = 0;
-	philos = (t_philosopher *)arg;
+	philos = (t_philos *)arg;
 	while (1)
 	{
 		time = get_milliseconds();

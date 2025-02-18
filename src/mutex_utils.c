@@ -12,7 +12,7 @@
 
 #include "../include/philosophers.h"
 
-void	lock_forks(t_philosopher *philo)
+void	lock_forks(t_philos *philo)
 {
 	int	left;
 	int	right;
@@ -31,7 +31,7 @@ void	lock_forks(t_philosopher *philo)
 	}
 }
 
-void	unlock_forks(t_philosopher *philo)
+void	unlock_forks(t_philos *philo)
 {
 	int	left;
 	int	right;
@@ -50,7 +50,7 @@ void	unlock_forks(t_philosopher *philo)
 	}
 }
 
-void	set_forks(t_philosopher *philo, int status)
+void	set_forks(t_philos *philo, int status)
 {
 	int	left;
 	int	right;
@@ -61,7 +61,7 @@ void	set_forks(t_philosopher *philo, int status)
 	philo -> info -> forks_status[right] = status;
 }
 
-int	check_forks(t_philosopher *philo, int status)
+int	check_forks(t_philos *philo, int status)
 {
 	int	left;
 	int	right;

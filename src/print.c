@@ -11,7 +11,7 @@
 /* ************************************************************************** */
 #include "../include/philosophers.h"
 
-void	print_eat(t_philosopher *philo)
+void	print_eat(t_philos *philo)
 {
 	long long	start;
 	int			id;
@@ -23,7 +23,7 @@ void	print_eat(t_philosopher *philo)
 	pthread_mutex_unlock(&philo -> info -> write_lock);
 }
 
-void	print_think(t_philosopher *philo)
+void	print_think(t_philos *philo)
 {
 	long long	start;
 	int			id;
@@ -35,7 +35,7 @@ void	print_think(t_philosopher *philo)
 	pthread_mutex_unlock(&philo -> info -> write_lock);
 }
 
-void	print_sleep(t_philosopher *philo)
+void	print_sleep(t_philos *philo)
 {
 	long long	start;
 	int			id;
@@ -47,7 +47,7 @@ void	print_sleep(t_philosopher *philo)
 	pthread_mutex_unlock(&philo -> info -> write_lock);
 }
 
-void	print_fork(t_philosopher *philo)
+void	print_fork(t_philos *philo)
 {
 	long long	start;
 	int			id;
