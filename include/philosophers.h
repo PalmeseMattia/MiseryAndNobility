@@ -41,6 +41,7 @@ typedef struct s_philosopher
 	t_thread_info	*info;
 	long long		last_meal;
 	int				id;
+	int				n_meals;
 }	t_philosopher;
 
 // Prints
@@ -50,4 +51,16 @@ void		print_think(t_philosopher *philo);
 void		print_fork(t_philosopher *philo);
 // Time util
 long long	get_milliseconds();
+// Monitor routine
+void		*stop_simulation(void *arg);
+// Mutex utils
+void		lock_forks(t_philosopher *philo);
+void		unlock_forks(t_philosopher *philo);
+void		set_forks(t_philosopher *philo, int status);
+int			check_forks(t_philosopher *philo, int status);
+// Actions
+void		think(t_philosopher *philo);
+void		p_sleep(t_philosopher *philo);
+void		eat(t_philosopher *philo);
+
 #endif

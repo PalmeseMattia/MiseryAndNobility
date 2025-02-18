@@ -11,68 +11,6 @@
 /* ************************************************************************** */
 #include "../include/philosophers.h"
 
-void	think(t_philosopher *philo)
-{
-	print_think(philo);
-	if (philo -> id % 2 == 1 && philo -> info -> n_threads % 2 == 1)
-		usleep(philo -> info -> time_to_eat * 1000);
-}
-
-void	p_sleep(t_philosopher *philo)
-{
-	print_sleep(philo);
-	usleep(philo -> info -> time_to_sleep * 1000);
-}
-
-void	eat(t_philosopher *philo)
-{
-	int	left;
-	int	right;
-
-	left = (philo -> id - 1) % philo -> info -> n_threads;
-	right = (philo -> id) % philo -> info -> n_threads;
-	//	Try to eat:
-	while(1)
-	{
-		pthread_mutex_lock(&philo -> info -> forks_locks[right]);
-		pthread_mutex_lock(&philo -> info -> forks_locks[left]);
-		// If (FORKS ARE DOWN)
-		if (philo -> info -> forks_status[right] == DOWN && philo -> info -> forks_status[left] == DOWN)
-		{
-			// FORKS UP
-			philo -> info -> forks_status[left] = UP;
-			philo -> info -> forks_status[right] = UP;
-			print_fork(philo);
-			// UNLOCK STATUSES
-			pthread_mutex_unlock(&philo -> info -> forks_locks[left]);
-			pthread_mutex_unlock(&philo -> info -> forks_locks[right]);
-			// EAT
-			print_eat(philo);
-			philo -> last_meal = get_milliseconds();
-			usleep(philo -> info -> time_to_eat * 1000);
-			// LOCK STATUSES
-			pthread_mutex_lock(&philo -> info -> forks_locks[left]);
-			pthread_mutex_lock(&philo -> info -> forks_locks[right]);
-			// FORKS DOWN
-			philo -> info -> forks_status[left] = DOWN;
-			philo -> info -> forks_status[right] = DOWN;
-			// UNLOCK STATUSES
-			pthread_mutex_unlock(&philo -> info -> forks_locks[left]);
-			pthread_mutex_unlock(&philo -> info -> forks_locks[right]);
-			// BREAK LOOP
-			break;
-		}
-		// Else
-		else
-		{
-			pthread_mutex_unlock(&philo -> info -> forks_locks[left]);
-			pthread_mutex_unlock(&philo -> info -> forks_locks[right]);
-			usleep(100);
-		}
-	}
-	// REPEAT
-}
-
 void	*main_loop(void *arg)
 {
 	while (1)
@@ -83,27 +21,6 @@ void	*main_loop(void *arg)
 	}
 	return (NULL);
 }
-
-void	*stop_simulation(void *arg)
-{
-	t_philosopher	*philos;
-	int				id;
-
-	id = 0;
-	philos = (t_philosopher *)arg;
-	while (1)
-	{
-		if (get_milliseconds() - philos[id].last_meal > philos[id].info -> time_to_die)
-		{
-			pthread_mutex_lock(&philos[0].info -> write_lock);
-			printf("%lld %d died\n", get_milliseconds() - philos[id].info -> start, id + 1);
-			break;
-		}
-		id = (id + 1) % philos[id].info -> n_threads;
-	}
-	return (NULL);
-}
-
 
 int main(int argc, char *argv[])
 {
