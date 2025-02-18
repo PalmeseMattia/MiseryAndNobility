@@ -28,7 +28,9 @@ void	p_sleep(t_philos *philo)
 static void	p_eat(t_philos *philo)
 {
 	print_eat(philo);
+	pthread_mutex_lock(&philo->info->last_meals_lock[philo->id - 1]);
 	philo -> last_meal = get_milliseconds();
+	pthread_mutex_unlock(&philo->info->last_meals_lock[philo->id - 1]);
 	usleep(philo -> info -> time_to_eat * 1000);
 	pthread_mutex_lock(&philo->info->meals_locks[philo->id -1]);
 	philo->info->n_meals[philo->id - 1]++;

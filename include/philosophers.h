@@ -29,6 +29,7 @@ typedef struct s_thread_info
 	pthread_mutex_t	*forks_locks;
 	pthread_mutex_t	*meals_locks;
 	pthread_mutex_t	write_lock;
+	pthread_mutex_t	*last_meals_lock;
 	int				n_threads;
 	unsigned int	time_to_die;
 	unsigned int	time_to_eat;

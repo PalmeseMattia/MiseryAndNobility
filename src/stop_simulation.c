@@ -33,6 +33,16 @@ int	check_meals(t_philos philo)
 	return (TRUE);
 }
 
+static long long	get_last_meal(t_philos *philo, int id)
+{
+	long long	result;
+
+	pthread_mutex_lock(&philo->info->last_meals_lock[id]);
+	result = philo[id].last_meal;
+	pthread_mutex_unlock(&philo->info->last_meals_lock[id]);
+	return (result);
+}
+
 void	*stop_simulation(void *arg)
 {
 	t_philos		*philos;
@@ -46,7 +56,7 @@ void	*stop_simulation(void *arg)
 	while (1)
 	{
 		time = get_milliseconds();
-		if (time - philos[id].last_meal > philos[id].info -> time_to_die)
+		if (time - get_last_meal(philos, id) > philos[id].info -> time_to_die)
 		{
 			pthread_mutex_lock(&philos[0].info -> write_lock);
 			death = time - philos[id].info -> start;

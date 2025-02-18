@@ -29,10 +29,12 @@ static void	init_mutexes(t_thread_info *info)
 	i = 0;
 	info->forks_locks = ft_calloc(info->n_threads, sizeof(pthread_mutex_t));
 	info->meals_locks = ft_calloc(info->n_threads, sizeof(pthread_mutex_t));
+	info->last_meals_lock = ft_calloc(info->n_threads, sizeof(pthread_mutex_t));
 	while (i < info->n_threads)
 	{
 		pthread_mutex_init(&info->forks_locks[i], NULL);
 		pthread_mutex_init(&info->meals_locks[i], NULL);
+		pthread_mutex_init(&info->last_meals_lock[i], NULL);
 		i++;
 	}
 	pthread_mutex_init(&info->write_lock, NULL);
